@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package com.ge.rpc;
+option go_package = "puppies";
+
+service Puppies { rpc GetById(GetByIdReq) returns (Puppy); }
+
+message GetByIdReq { 
+  string id = 1; 
+  string name = 2;
+}
+
+message Puppy {
+  string id = 1;
+  string name = 2;
+  double age = 3;
+  double weight = 4;
+  string primaryColor = 5;
+  string secondaryColor = 6;
+  string owner = 7;
+  string location = 8;
+  string motto = 9;
+  string breed = 10;
+}
+/*
+ID             string  `json:"id"`
+Name           string  `json:"name"`
+Age            float64 `json:"age"`
+Weight         string  `json:"weight"`
+PrimaryColor   string  `json:"primaryColor"`
+SecondaryColor string  `json:"secondaryColor"`
+Owner          string  `json:"owner"`
+Location       string  `json:"location"`
+Motto          string  `json:"motto"`
+Breed          string  `json:"breed"`
+*/
