@@ -1,32 +1,32 @@
-Serverless Start Guide for Golang.
+## Serverless Start Guide for Golang.
 
-Simple three steps you can start instantly. Assume that Serverless Framework is already installed.
+### Simple three steps you can start instantly. Assume that Serverless Framework is already installed.
 
-## 1. Create a project
+### 1. Create a project
 
 ```s
 $ serverless create -t aws-go-dep -p <project_name>
 ```
 
-## 2. Build
+### 2. Build
 
 ```s
 $ make
 ```
 
-## 3. Deploy
+### 3. Deploy
 
 ```s
 $ serverless deploy
 ```
 
-## If you need to tear down, Remove the whole deployment.
+### If you need to tear down, Remove the whole deployment.
 
 ```s
 $ serverless remove
 ```
 
-## You can still invoke a function manually.
+### You can still invoke a function manually.
 
 ```s
 $ serverless invoke -f <function>
@@ -60,20 +60,22 @@ aws_secret_access_key = ***************
 
 More tips for profile.
 
-````s
+```s
 $ aws configure --profile account1
 $ aws configure --profile account2
 
 $ aws dynamodb list-tables --profile account1
 $ aws s3 ls --profile account2
-```s
+```
+
 If you want to use one of profiles as default, you could set it and test it.
+
 ```s
 $ export AWS_DEFAULT_PROFILE=account1
 $ aws dynamodb list-tables
-````
+```
 
-## Add a profile, if not provided, default one is used.
+### Add a profile, if not provided, default one is used.
 
 ```yaml
 provider:
@@ -82,7 +84,7 @@ runtime: go1.x
 profile: sls-admin
 ```
 
-## Seeding Data to Dynamo
+### Seeding Data to Dynamo
 
 ```s
 $ go run cmd/seed-dynamo/main.go --table-name="$YOUR_TABLE_NAME"
@@ -102,12 +104,12 @@ export AWS_DEFAULT_PROFILE=account1
 	svc := dynamodb.New(session)
 ```
 
-## Testing
+### Testing
 
 Use Curl
 
 ```s
-$ curl -X POST https://<apigw-url> -d 'Hello,world!'
+$ curl -X POST https://<apigw-url> -d <request data>
 ```
 
 Run client
