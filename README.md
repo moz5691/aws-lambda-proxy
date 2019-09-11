@@ -102,8 +102,16 @@ export AWS_DEFAULT_PROFILE=account1
 	svc := dynamodb.New(session)
 ```
 
-## Use curl
+## Testing
+
+Use Curl
 
 ```s
-$ curl -X POST https://sl3yygvsuc.execute-api.us-east-1.amazonaws.com/dev/test -d 'Hello,world!'
+$ curl -X POST https://<apigw-url> -d 'Hello,world!'
+```
+
+Run client
+
+```s
+$ make dev-crun
 ```
