@@ -21,6 +21,7 @@ provider:
         - "dynamodb:GetShardIterator"
         - "dynamodb:BatchGetItem"
         - "dynamodb:GetItem"
+        - "dynamodb:DeleteItem"
         - "dynamodb:Query"
         - "dynamodb:Scan"
         - "dynamodb:DescribeReservedCapacity"

@@ -33,7 +33,11 @@ import url "net/url"
 // =================
 
 type Puppies interface {
-	GetById(context.Context, *GetByIdReq) (*Puppy, error)
+	GetByName(context.Context, *Name) (*Puppy, error)
+
+	DeleteByName(context.Context, *Name) (*Name, error)
+
+	UpdateAgeWeight(context.Context, *Update) (*Update, error)
 }
 
 // =======================
@@ -42,15 +46,17 @@ type Puppies interface {
 
 type puppiesProtobufClient struct {
 	client HTTPClient
-	urls   [1]string
+	urls   [3]string
 }
 
 // NewPuppiesProtobufClient creates a Protobuf client that implements the Puppies interface.
 // It communicates using Protobuf and can be configured with a custom HTTPClient.
 func NewPuppiesProtobufClient(addr string, client HTTPClient) Puppies {
 	prefix := urlBase(addr) + PuppiesPathPrefix
-	urls := [1]string{
-		prefix + "GetById",
+	urls := [3]string{
+		prefix + "GetByName",
+		prefix + "DeleteByName",
+		prefix + "UpdateAgeWeight",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
 		return &puppiesProtobufClient{
@@ -64,12 +70,36 @@ func NewPuppiesProtobufClient(addr string, client HTTPClient) Puppies {
 	}
 }
 
-func (c *puppiesProtobufClient) GetById(ctx context.Context, in *GetByIdReq) (*Puppy, error) {
+func (c *puppiesProtobufClient) GetByName(ctx context.Context, in *Name) (*Puppy, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
-	ctx = ctxsetters.WithMethodName(ctx, "GetById")
+	ctx = ctxsetters.WithMethodName(ctx, "GetByName")
 	out := new(Puppy)
 	err := doProtobufRequest(ctx, c.client, c.urls[0], in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *puppiesProtobufClient) DeleteByName(ctx context.Context, in *Name) (*Name, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
+	ctx = ctxsetters.WithMethodName(ctx, "DeleteByName")
+	out := new(Name)
+	err := doProtobufRequest(ctx, c.client, c.urls[1], in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *puppiesProtobufClient) UpdateAgeWeight(ctx context.Context, in *Update) (*Update, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateAgeWeight")
+	out := new(Update)
+	err := doProtobufRequest(ctx, c.client, c.urls[2], in, out)
 	if err != nil {
 		return nil, err
 	}
@@ -82,15 +112,17 @@ func (c *puppiesProtobufClient) GetById(ctx context.Context, in *GetByIdReq) (*P
 
 type puppiesJSONClient struct {
 	client HTTPClient
-	urls   [1]string
+	urls   [3]string
 }
 
 // NewPuppiesJSONClient creates a JSON client that implements the Puppies interface.
 // It communicates using JSON and can be configured with a custom HTTPClient.
 func NewPuppiesJSONClient(addr string, client HTTPClient) Puppies {
 	prefix := urlBase(addr) + PuppiesPathPrefix
-	urls := [1]string{
-		prefix + "GetById",
+	urls := [3]string{
+		prefix + "GetByName",
+		prefix + "DeleteByName",
+		prefix + "UpdateAgeWeight",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
 		return &puppiesJSONClient{
@@ -104,12 +136,36 @@ func NewPuppiesJSONClient(addr string, client HTTPClient) Puppies {
 	}
 }
 
-func (c *puppiesJSONClient) GetById(ctx context.Context, in *GetByIdReq) (*Puppy, error) {
+func (c *puppiesJSONClient) GetByName(ctx context.Context, in *Name) (*Puppy, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
-	ctx = ctxsetters.WithMethodName(ctx, "GetById")
+	ctx = ctxsetters.WithMethodName(ctx, "GetByName")
 	out := new(Puppy)
 	err := doJSONRequest(ctx, c.client, c.urls[0], in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *puppiesJSONClient) DeleteByName(ctx context.Context, in *Name) (*Name, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
+	ctx = ctxsetters.WithMethodName(ctx, "DeleteByName")
+	out := new(Name)
+	err := doJSONRequest(ctx, c.client, c.urls[1], in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *puppiesJSONClient) UpdateAgeWeight(ctx context.Context, in *Update) (*Update, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "com.ge.rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Puppies")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateAgeWeight")
+	out := new(Update)
+	err := doJSONRequest(ctx, c.client, c.urls[2], in, out)
 	if err != nil {
 		return nil, err
 	}
@@ -164,8 +220,14 @@ func (s *puppiesServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	switch req.URL.Path {
-	case "/twirp/com.ge.rpc.Puppies/GetById":
-		s.serveGetById(ctx, resp, req)
+	case "/twirp/com.ge.rpc.Puppies/GetByName":
+		s.serveGetByName(ctx, resp, req)
+		return
+	case "/twirp/com.ge.rpc.Puppies/DeleteByName":
+		s.serveDeleteByName(ctx, resp, req)
+		return
+	case "/twirp/com.ge.rpc.Puppies/UpdateAgeWeight":
+		s.serveUpdateAgeWeight(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -175,7 +237,7 @@ func (s *puppiesServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *puppiesServer) serveGetById(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *puppiesServer) serveGetByName(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -183,9 +245,9 @@ func (s *puppiesServer) serveGetById(ctx context.Context, resp http.ResponseWrit
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.serveGetByIdJSON(ctx, resp, req)
+		s.serveGetByNameJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.serveGetByIdProtobuf(ctx, resp, req)
+		s.serveGetByNameProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -193,16 +255,16 @@ func (s *puppiesServer) serveGetById(ctx context.Context, resp http.ResponseWrit
 	}
 }
 
-func (s *puppiesServer) serveGetByIdJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *puppiesServer) serveGetByNameJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetById")
+	ctx = ctxsetters.WithMethodName(ctx, "GetByName")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
 		return
 	}
 
-	reqContent := new(GetByIdReq)
+	reqContent := new(Name)
 	unmarshaler := jsonpb.Unmarshaler{AllowUnknownFields: true}
 	if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {
 		s.writeError(ctx, resp, malformedRequestError("the json request could not be decoded"))
@@ -213,7 +275,7 @@ func (s *puppiesServer) serveGetByIdJSON(ctx context.Context, resp http.Response
 	var respContent *Puppy
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.Puppies.GetById(ctx, reqContent)
+		respContent, err = s.Puppies.GetByName(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -221,7 +283,7 @@ func (s *puppiesServer) serveGetByIdJSON(ctx context.Context, resp http.Response
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Puppy and nil error while calling GetById. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Puppy and nil error while calling GetByName. nil responses are not supported"))
 		return
 	}
 
@@ -248,9 +310,9 @@ func (s *puppiesServer) serveGetByIdJSON(ctx context.Context, resp http.Response
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *puppiesServer) serveGetByIdProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *puppiesServer) serveGetByNameProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetById")
+	ctx = ctxsetters.WithMethodName(ctx, "GetByName")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -262,7 +324,7 @@ func (s *puppiesServer) serveGetByIdProtobuf(ctx context.Context, resp http.Resp
 		s.writeError(ctx, resp, wrapInternal(err, "failed to read request body"))
 		return
 	}
-	reqContent := new(GetByIdReq)
+	reqContent := new(Name)
 	if err = proto.Unmarshal(buf, reqContent); err != nil {
 		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
 		return
@@ -272,7 +334,7 @@ func (s *puppiesServer) serveGetByIdProtobuf(ctx context.Context, resp http.Resp
 	var respContent *Puppy
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.Puppies.GetById(ctx, reqContent)
+		respContent, err = s.Puppies.GetByName(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -280,7 +342,265 @@ func (s *puppiesServer) serveGetByIdProtobuf(ctx context.Context, resp http.Resp
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Puppy and nil error while calling GetById. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Puppy and nil error while calling GetByName. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *puppiesServer) serveDeleteByName(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveDeleteByNameJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveDeleteByNameProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *puppiesServer) serveDeleteByNameJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "DeleteByName")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	reqContent := new(Name)
+	unmarshaler := jsonpb.Unmarshaler{AllowUnknownFields: true}
+	if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the json request could not be decoded"))
+		return
+	}
+
+	// Call service method
+	var respContent *Name
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = s.Puppies.DeleteByName(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Name and nil error while calling DeleteByName. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	var buf bytes.Buffer
+	marshaler := &jsonpb.Marshaler{OrigName: true}
+	if err = marshaler.Marshal(&buf, respContent); err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	respBytes := buf.Bytes()
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *puppiesServer) serveDeleteByNameProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "DeleteByName")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to read request body"))
+		return
+	}
+	reqContent := new(Name)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	// Call service method
+	var respContent *Name
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = s.Puppies.DeleteByName(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Name and nil error while calling DeleteByName. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *puppiesServer) serveUpdateAgeWeight(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUpdateAgeWeightJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUpdateAgeWeightProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *puppiesServer) serveUpdateAgeWeightJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateAgeWeight")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	reqContent := new(Update)
+	unmarshaler := jsonpb.Unmarshaler{AllowUnknownFields: true}
+	if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the json request could not be decoded"))
+		return
+	}
+
+	// Call service method
+	var respContent *Update
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = s.Puppies.UpdateAgeWeight(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Update and nil error while calling UpdateAgeWeight. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	var buf bytes.Buffer
+	marshaler := &jsonpb.Marshaler{OrigName: true}
+	if err = marshaler.Marshal(&buf, respContent); err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	respBytes := buf.Bytes()
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *puppiesServer) serveUpdateAgeWeightProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateAgeWeight")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to read request body"))
+		return
+	}
+	reqContent := new(Update)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	// Call service method
+	var respContent *Update
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = s.Puppies.UpdateAgeWeight(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Update and nil error while calling UpdateAgeWeight. nil responses are not supported"))
 		return
 	}
 
@@ -793,22 +1113,25 @@ func callError(ctx context.Context, h *twirp.ServerHooks, err twirp.Error) conte
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 269 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x91, 0xcf, 0x4b, 0xc3, 0x40,
-	0x10, 0x85, 0x49, 0x7f, 0xa5, 0x19, 0xa4, 0xe8, 0x20, 0x65, 0xed, 0xa9, 0xe4, 0x20, 0x3d, 0xa5,
-	0xa2, 0xde, 0x85, 0x7a, 0x10, 0x6f, 0x25, 0x47, 0x6f, 0xe9, 0x66, 0x88, 0x0b, 0x4d, 0x66, 0xdd,
-	0x6c, 0x2d, 0xf9, 0xeb, 0x95, 0x4c, 0x42, 0xab, 0x9e, 0xbc, 0xed, 0xfb, 0xe6, 0xcd, 0x1e, 0xbe,
-	0x81, 0x1b, 0x67, 0xf5, 0xda, 0x1e, 0xac, 0x35, 0x54, 0xaf, 0x6b, 0x72, 0x9f, 0x46, 0x53, 0x62,
-	0x1d, 0x7b, 0x46, 0xd0, 0x5c, 0x26, 0x05, 0x25, 0xce, 0xea, 0xf8, 0x0e, 0xe0, 0x85, 0xfc, 0xa6,
-	0x79, 0xcd, 0x53, 0xfa, 0xc0, 0x19, 0x0c, 0x4c, 0xae, 0x82, 0x65, 0xb0, 0x8a, 0xd2, 0x81, 0xc9,
-	0x11, 0x61, 0x54, 0x65, 0x25, 0xa9, 0x81, 0x10, 0x79, 0xc7, 0x5f, 0x01, 0x8c, 0xb7, 0x07, 0x6b,
-	0x9b, 0xff, 0xb4, 0xf1, 0x12, 0x86, 0x59, 0x41, 0x6a, 0xb8, 0x0c, 0x56, 0x41, 0xda, 0x3e, 0x71,
-	0x0e, 0x93, 0x23, 0x99, 0xe2, 0xdd, 0xab, 0x91, 0xc0, 0x3e, 0x61, 0x0c, 0x17, 0xd6, 0x99, 0x32,
-	0x73, 0xcd, 0x33, 0xef, 0xd9, 0xa9, 0xb1, 0xfc, 0xf2, 0x8b, 0xe1, 0x2d, 0xcc, 0x6a, 0xd2, 0x5c,
-	0xe5, 0xa7, 0xd6, 0x44, 0x5a, 0x7f, 0x28, 0x5e, 0xc3, 0x98, 0x8f, 0x15, 0x39, 0x15, 0xca, 0xb8,
-	0x0b, 0xb8, 0x80, 0xe9, 0x9e, 0x75, 0xe6, 0x0d, 0x57, 0x6a, 0x2a, 0x83, 0x53, 0x6e, 0x37, 0x4a,
-	0xf6, 0x9e, 0x55, 0xd4, 0x6d, 0x48, 0x68, 0xe9, 0xce, 0x11, 0xe5, 0x0a, 0x3a, 0x2a, 0xe1, 0xfe,
-	0x09, 0xc2, 0x6d, 0x27, 0x16, 0x1f, 0x21, 0xec, 0xf5, 0xe1, 0x3c, 0x39, 0x6b, 0x4d, 0xce, 0x4e,
-	0x17, 0x57, 0x3f, 0xb9, 0x88, 0xdb, 0x44, 0x6f, 0x61, 0x7f, 0x99, 0xdd, 0x44, 0x4e, 0xf2, 0xf0,
-	0x1d, 0x00, 0x00, 0xff, 0xff, 0x87, 0x6e, 0x61, 0x37, 0xaf, 0x01, 0x00, 0x00,
+	// 313 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0x4f, 0x4b, 0x03, 0x31,
+	0x10, 0xc5, 0x49, 0xff, 0x6c, 0xbb, 0x43, 0xa9, 0x75, 0x10, 0x89, 0x3d, 0x95, 0x3d, 0x48, 0xf1,
+	0xb0, 0x95, 0x7a, 0xf2, 0x68, 0x15, 0xbc, 0x49, 0x29, 0xa8, 0xe0, 0x2d, 0xcd, 0x0e, 0x6b, 0xa0,
+	0xbb, 0x09, 0x69, 0x6a, 0xe9, 0x57, 0xf2, 0x4b, 0x2a, 0x9b, 0x94, 0x5a, 0xff, 0x81, 0x07, 0x6f,
+	0xf3, 0x7e, 0xf3, 0x66, 0x0e, 0xf3, 0x06, 0x4e, 0xac, 0x91, 0x23, 0xb3, 0x32, 0x46, 0xd1, 0x72,
+	0xb4, 0x24, 0xfb, 0xa2, 0x24, 0xa5, 0xc6, 0x6a, 0xa7, 0x11, 0xa4, 0x2e, 0xd2, 0x9c, 0x52, 0x6b,
+	0x64, 0x72, 0x06, 0x8d, 0x3b, 0x51, 0x10, 0x76, 0xa1, 0xa6, 0x32, 0xce, 0x06, 0x6c, 0x18, 0xcf,
+	0x6a, 0x2a, 0x43, 0x84, 0x46, 0x29, 0x0a, 0xe2, 0x35, 0x4f, 0x7c, 0x9d, 0x3c, 0x40, 0x74, 0x6f,
+	0x32, 0xe1, 0xfe, 0xe4, 0xc6, 0x1e, 0xd4, 0x45, 0x4e, 0xbc, 0x3e, 0x60, 0x43, 0x36, 0xab, 0x4a,
+	0x3c, 0x86, 0x68, 0x4d, 0x2a, 0x7f, 0x76, 0xbc, 0xe1, 0xe1, 0x56, 0x25, 0x6f, 0x0c, 0x9a, 0xd3,
+	0x95, 0x31, 0x9b, 0xff, 0xdd, 0x8b, 0x09, 0x74, 0x8c, 0x55, 0x85, 0xb0, 0x9b, 0x6b, 0xbd, 0xd0,
+	0x96, 0x37, 0xfd, 0x96, 0x4f, 0x0c, 0x4f, 0xa1, 0xbb, 0x24, 0xa9, 0xcb, 0x6c, 0xe7, 0x8a, 0xbc,
+	0xeb, 0x0b, 0xc5, 0x23, 0x68, 0xea, 0x75, 0x49, 0x96, 0xb7, 0x7c, 0x3b, 0x08, 0xec, 0x43, 0x7b,
+	0xa1, 0xa5, 0x70, 0x4a, 0x97, 0xbc, 0xed, 0x1b, 0x3b, 0x5d, 0x4d, 0x14, 0xda, 0x39, 0xcd, 0xe3,
+	0x30, 0xe1, 0x45, 0x45, 0xe7, 0x96, 0x28, 0xe3, 0x10, 0xa8, 0x17, 0xe3, 0x57, 0x06, 0xad, 0x69,
+	0xc8, 0x0a, 0xcf, 0x21, 0xbe, 0x25, 0x37, 0xd9, 0xf8, 0x58, 0x7a, 0xe9, 0x47, 0x56, 0x69, 0x45,
+	0xfa, 0x87, 0xfb, 0x24, 0x5c, 0x6d, 0x0c, 0x9d, 0x1b, 0x5a, 0x90, 0xa3, 0x5f, 0x87, 0xbe, 0x11,
+	0xbc, 0x84, 0x83, 0x90, 0xe5, 0x55, 0x4e, 0x8f, 0xe1, 0x5c, 0xb8, 0x6f, 0x0a, 0xcd, 0xfe, 0x0f,
+	0x6c, 0x12, 0x3f, 0xb5, 0xb6, 0x7f, 0x35, 0x8f, 0xfc, 0x43, 0x5d, 0xbc, 0x07, 0x00, 0x00, 0xff,
+	0xff, 0x5f, 0x75, 0xeb, 0xff, 0x6d, 0x02, 0x00, 0x00,
 }

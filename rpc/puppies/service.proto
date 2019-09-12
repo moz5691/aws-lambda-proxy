@@ -3,11 +3,22 @@ syntax = "proto3";
 package com.ge.rpc;
 option go_package = "puppies";
 
-service Puppies { rpc GetById(GetByIdReq) returns (Puppy); }
+service Puppies { 
+  rpc GetByName(Name) returns (Puppy);
+  rpc DeleteByName(Name) returns (Name);
+  rpc UpdateAgeWeight(Update) returns (Update);
+}
 
-message GetByIdReq { 
+message Name { 
   string id = 1; 
   string name = 2;
+}
+
+message Update {
+  string id = 1;
+  string name = 2;
+  double age = 3;
+  double weight = 4;
 }
 
 message Puppy {
