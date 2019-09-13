@@ -29,9 +29,8 @@ dev-run:
 	$(GOBUILD) -o build/$(BINARY_NAME) -v cmd/$(SERVICE)server/main.go
 	build/$(BINARY_NAME)
 
-dev-crun:
+dev-cbuild:
 	$(GOBUILD) -o build/$(CLIENT_BINARY_NAME) -v cmd/$(SERVICE)client/main.go
-	build/$(CLIENT_BINARY_NAME)
 
 test:
 	$(GOTEST) -v ./cmd/$(SERVICE)services

@@ -115,5 +115,8 @@ $ curl -X POST https://<apigw-url> -d <request data>
 Run client
 
 ```s
-$ make dev-crun
+### Firtst create "local.env" file and add the following line.
+APIGATEWAY_URL=<api gateway url>
+$ make dev-cbuild
+$ ./build/client -h  (shows help menu)
 ```
