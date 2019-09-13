@@ -125,7 +125,7 @@ Debug
 
 ```s
 ### To bypass TLS connection and HTTPS requests error during Serverless deploy,
-### you may need to disable certification verification.  This case may happend your
+### you may need to disable certification verification.  This case may happend if your
 ### development environment is behind http/https-proxy.  If you still see more errors,
 ### You may want to enable debug with sls deploy.
 export NODE_TLS_REJECT_UNAUTHORIZED=0
