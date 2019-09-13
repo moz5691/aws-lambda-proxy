@@ -35,3 +35,6 @@ dev-crun:
 
 test:
 	$(GOTEST) -v ./cmd/$(SERVICE)services
+
+seed:
+	$(GORUN) cmd/seed-dynamo/main.go --table-name=puppies

@@ -159,3 +159,11 @@ func Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
 	return client.QueryWithContext(ctx, input)
 
 }
+
+func Scan(input *dynamodb.ScanInput) (*dynamodb.ScanOutput, error) {
+	client := GetDynamoClient()
+	input.TableName = &DynamoTableName
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	return client.ScanWithContext(ctx, input)
+}

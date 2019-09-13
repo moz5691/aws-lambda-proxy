@@ -3,11 +3,14 @@ package puppiesserver
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	// "math/rand"
 
@@ -125,10 +128,10 @@ func (s *Server) UpdateAgeWeight(ctx context.Context, req *rpc.Update) (*rpc.Upd
 		},
 		TableName: &awsutils.DynamoTableName,
 		Key: map[string]*dynamodb.AttributeValue{
-			"Id": {
+			"id": {
 				S: aws.String(id),
 			},
-			"Title": {
+			"name": {
 				S: aws.String(name),
 			},
 		},
@@ -150,4 +153,75 @@ func (s *Server) UpdateAgeWeight(ctx context.Context, req *rpc.Update) (*rpc.Upd
 		Age:    age,
 	}, nil
 
+}
+
+func (s *Server) ScanBreed(ctx context.Context, req *rpc.Breed) (*rpc.PuppyList, error) {
+	// maxAge := req.GetAge()
+	breed := req.GetBreed()
+
+	filt := expression.Name("breed").Equal(expression.Value(breed))
+	// condition := expression.And(expression.Name("breed").Equal(expression.Value(breed)),
+	// 	expression.Name("age").LessThanEqual(expression.Value(maxAge)))
+	proj := expression.NamesList(expression.Name("name"), expression.Name("age"), expression.Name("breed"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	if err != nil {
+		fmt.Println("Got error building expression")
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	params := &dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+		TableName:                 &awsutils.DynamoTableName,
+	}
+
+	result, err := awsutils.Scan(params)
+	if err != nil {
+		fmt.Println("Query API call failed")
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Printf("scan result: %v\n", result)
+	// numItems := 0
+
+	// for _, i := range result.Items {
+	// 	p := &puppy{}
+
+	// 	err = awsutils.UnmarshalMap(i, &p)
+
+	// 	if err != nil {
+	// 		fmt.Println("Got error from unmarshalling :")
+	// 		fmt.Println(err.Error())
+	// 		os.Exit(1)
+	// 	}
+
+	// 	if p.Age < maxAge+1 {
+	// 		numItems++
+	// 		fmt.Println("Name: ", p.Name)
+	// 		fmt.Println("Age: ", p.Name)
+	// 		fmt.Println("Breed: ", p.Breed)
+	// 		fmt.Println()
+	// 	}
+	// }
+
+	// fmt.Println("Found", numItems, "age less than or equal to ", maxAge, " with breed ", breed)
+
+	puppyList := []*rpc.Puppy{}
+
+	err2 := awsutils.UnmarshalListOfMaps(result.Items, &puppyList)
+
+	if err2 != nil {
+		fmt.Println(" Unmarshalling list of maps failed")
+	}
+	fmt.Printf("unmarshalled list %v \n", puppyList)
+
+	return &rpc.PuppyList{
+		Puppy: puppyList,
+	}, nil
 }
