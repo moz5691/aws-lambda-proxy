@@ -120,3 +120,14 @@ APIGATEWAY_URL=<api gateway url>
 $ make dev-cbuild
 $ ./build/client -h  (shows help menu)
 ```
+
+Debug
+
+```s
+### To bypass TLS connection and HTTPS requests error during Serverless deploy,
+### you may need to disable certification verification.  This case may happend your
+### development environment is behind http/https-proxy.  If you still see more errors,
+### You may want to enable debug with sls deploy.
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+export SLS_DEBUG=*; sls deploy --verbose
+```
