@@ -9,8 +9,8 @@ import (
 	"github.com/apex/gateway"
 	"github.com/rs/cors"
 
-	"github.com/moz5691/lambda-proxy/internal/puppiesserver"
-	"github.com/moz5691/lambda-proxy/rpc/puppies"
+	"github.com/moz5691/aws-lambda-proxy/internal/puppiesserver"
+	"github.com/moz5691/aws-lambda-proxy/rpc/puppies"
 )
 
 func main() {

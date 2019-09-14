@@ -13,7 +13,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	rpc "github.com/moz5691/lambda-proxy/rpc/puppies"
+	rpc "github.com/moz5691/aws-lambda-proxy/rpc/puppies"
 )
 
 func main() {

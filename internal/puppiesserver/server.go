@@ -14,8 +14,8 @@ import (
 
 	// "math/rand"
 
-	"github.com/moz5691/lambda-proxy/internal/awsutils"
-	rpc "github.com/moz5691/lambda-proxy/rpc/puppies"
+	"github.com/moz5691/aws-lambda-proxy/internal/awsutils"
+	rpc "github.com/moz5691/aws-lambda-proxy/rpc/puppies"
 	"github.com/twitchtv/twirp"
 )
 
